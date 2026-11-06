@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NETSIM | Cricket Simulator</title>
+
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #08161b;
+      color: white;
+    }
+
+    header {
+      background: #0c2026;
+      border-bottom: 1px solid #29454d;
+      padding: 18px 5%;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand span { font-size: 35px; }
+
+    .brand h1 {
+      margin: 0;
+      color: #63e6a3;
+      letter-spacing: 2px;
+    }
+
+    .brand p {
+      margin: 3px 0 0;
+      font-size: 10px;
+      color: #9db2ae;
+      letter-spacing: 1px;
+    }
+
+    main {
+      max-width: 1300px;
+      margin: auto;
+      padding: 25px;
+    }
+
+    .hero { margin-bottom: 25px; }
+
+    .eyebrow {
+      color: #63e6a3;
+      font-size: 11px;
+      font-weight: bold;
+      letter-spacing: 2px;
+    }
+
+    .hero h2 {
+      font-size: 34px;
+      margin: 8px 0;
+    }
+
+    .hero p { color: #a4b8b4; }
+
+    .camera-section,
+    .controls,
+    .field-section,
+    .result,
+    .argument-mode {
+      background: #0d2026;
+      border: 1px solid #29454d;
+      border-radius: 15px;
+    }
+
+    .camera-section {
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .camera-section h2 {
+      color: #63e6a3;
+      margin-top: 0;
+    }
+
+    #camera,
+    #playback {
+      width: 100%;
+      max-height: 500px;
+      background: black;
+      border-radius: 10px;
+      margin-top: 10px;
+    }
+
+    #playback { display: none; }
+
+    .camera-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    button {
+      padding: 12px 16px;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      background: #18343c;
+      color: white;
+    }
+
+    button:hover { opacity: 0.85; }
+
+    .primary {
+      background: #63e6a3;
+      color: #082016;
+    }
+
+    button:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    #cameraStatus {
+      color: #a4b8b4;
+      font-size: 13px;
+    }
+
+    .app-layout {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      gap: 20px;
+    }
+
+    .controls { padding: 20px; }
+
+    label {
+      display: block;
+      margin-top: 18px;
+      color: #a4b8b4;
+      font-size: 12px;
+    }
+
+    select,
+    input[type="range"] {
+      width: 100%;
+      margin-top: 8px;
+    }
+
+    select {
+      background: #142e35;
+      color: white;
+      border: 1px solid #36545d;
+      padding: 10px;
+      border-radius: 7px;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 6px;
+      margin-top: 18px;
+    }
+
+    .shot-button { flex: 1; }
+
+    .shot-button.active {
+      background: #237d59;
+      border: 1px solid #63e6a3;
+    }
+
+    .instructions {
+      margin: 20px 0;
+      padding: 12px;
+      background: #112a30;
+      color: #a8bdb9;
+      border-radius: 8px;
+      font-size: 12px;
+    }
+
+    #simulate,
+    .secondary {
+      width: 100%;
+      margin-top: 8px;
+    }
+
+    #simulate {
+      background: #63e6a3;
+      color: #082016;
+    }
+
+    .secondary {
+      background: transparent;
+      border: 1px solid #36545d;
+    }
+
+    .field-section { padding: 15px; }
+
+    .field-top {
+      color: #a4b8b4;
+      font-size: 12px;
+      padding-bottom: 10px;
+    }
+
+    #field {
+      height: 560px;
+      position: relative;
+      overflow: hidden;
+      border-radius: 12px;
+      background: #216342;
+      cursor: crosshair;
+    }
+
+    .outer-circle,
+    .inner-circle {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+    }
+
+    .outer-circle {
+      width: 92%;
+      height: 90%;
+      background: #1b593d;
+    }
+
+    .inner-circle {
+      width: 56%;
+      height: 54%;
+      background: #317b54;
+    }
+
+    .pitch {
+      position: absolute;
+      width: 6%;
+      height: 30%;
+      left: 47%;
+      top: 35%;
+      background: #c6b477;
+      z-index: 2;
+    }
+
+    .batter {
+      position: absolute;
+      left: 48%;
+      top: 60%;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #e5bd49;
+      color: #172017;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 9px;
+      font-weight: bold;
+      z-index: 3;
+    }
+
+    .fielder {
+      position: absolute;
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      background: #287bd6;
+      border: 2px solid #acd7ff;
+      transform: translate(-50%, -50%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: grab;
+      z-index: 10;
+      font-size: 10px;
+      touch-action: none;
+    }
+
+    .fielder-name {
+      position: absolute;
+      top: 37px;
+      white-space: nowrap;
+      font-size: 9px;
+      color: white;
+    }
+
+    .ball {
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      background: #ed4f4f;
+      border: 2px solid white;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 11;
+    }
+
+    .hidden { display: none; }
+
+    .field-note {
+      text-align: center;
+      color: #829995;
+      font-size: 10px;
+    }
+
+    .result {
+      margin-top: 20px;
+      padding: 20px;
+    }
+
+    .result h2 { color: #63e6a3; }
+
+    .percentage span {
+      color: #63e6a3;
+      font-size: 42px;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .stats div {
+      background: #112a30;
+      padding: 12px;
+      border-radius: 8px;
+    }
+
+    .stats small {
+      display: block;
+      color: #8ca29d;
+      font-size: 10px;
+    }
+
+    .argument-mode {
+      margin-top: 20px;
+      padding: 25px;
+      text-align: center;
+    }
+
+    .vote-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+    }
+
+    .vote.selected {
+      background: #237d59;
+      border: 1px solid #63e6a3;
+    }
+
+    footer {
+      text-align: center;
+      padding: 30px;
+      color: #647b77;
+      font-size: 11px;
+    }
+
+    @media (max-width: 800px) {
+      main { padding: 15px; }
+
+      .app-layout {
+        grid-template-columns: 1fr;
+      }
+
+      #field { height: 480px; }
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <div class="brand">
+    <span>🏏</span>
+    <div>
+      <h1>NETSIM</h1>
+      <p>SET THE FIELD. MAP THE BALL. SETTLE THE ARGUMENT.</p>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <section class="hero">
+    <p class="eyebrow">CRICKET FIELD SIMULATOR</p>
+    <h2>Film it. Set the field. Settle the argument.</h2>
+    <p>Record your cricket shot, then use NETSIM to simulate what could have happened.</p>
+  </section>
+
+  <section class="camera-section">
+    <h2>📹 NETSIM CAMERA</h2>
+    <p>Use a phone or tripod to record the cricket shot.</p>
+
+    <video id="camera" autoplay playsinline muted></video>
+    <video id="playback" controls playsinline></video>
+
+    <div class="camera-buttons">
+      <button id="startCamera" class="primary">START CAMERA</button>
+      <button id="recordButton" disabled>⏺ START RECORDING</button>
+      <button id="stopRecordButton" disabled>■ STOP RECORDING</button>
+      <button id="stopCamera">STOP CAMERA</button>
+    </div>
+
+    <p id="cameraStatus">Camera is off.</p>
+  </section>
+
+  <div class="app-layout">
+
+    <aside class="controls">
+      <h2>Simulation Controls</h2>
+
+      <label for="level">Cricket Level</label>
+      <select id="level">
+        <option value="U12">U12</option>
+        <option value="U14" selected>U14</option>
+        <option value="U16">U16</option>
+        <option value="Adult">Adult</option>
+        <option value="Pro">Professional</option>
+      </select>
+
+      <label for="hangTime">
+        Hang Time: <span id="hangValue">3.0</span> seconds
+      </label>
+
+      <input type="range" id="hangTime" min="0.5" max="7" value="3" step="0.1">
+
+      <div class="button-group">
+        <button class="shot-button active" data-shot="lofted">LOFTED</button>
+        <button class="shot-button" data-shot="ground">GROUND</button>
+      </div>
+
+      <div class="instructions">
+        <strong>HOW TO USE NETSIM</strong>
+        <ol>
+          <li>Record your shot.</li>
+          <li>Drag the fielders.</li>
+          <li>Click where the ball lands.</li>
+          <li>Run the simulation.</li>
+        </ol>
+      </div>
+
+      <button id="simulate" disabled>RUN SIMULATION</button>
+      <button id="reset" class="secondary">RESET FIELD</button>
+    </aside>
+
+    <section class="field-section">
+
+      <div class="field-top">
+        <span id="status">Drag fielders, then click where the ball lands.</span>
+      </div>
+
+      <div id="field">
+        <div class="outer-circle"></div>
+        <div class="inner-circle"></div>
+        <div class="pitch"></div>
+        <div class="batter">BAT</div>
+        <div id="ball" class="ball hidden"></div>
+      </div>
+
+      <p class="field-note">
+        NETSIM is a training simulation and provides estimates only.
+      </p>
+
+    </section>
+  </div>
+
+  <section id="result" class="result hidden">
+    <p>NETSIM VERDICT</p>
+    <h2 id="verdict">—</h2>
+
+    <div class="percentage">
+      <span id="chance">0</span>% <small>catch chance</small>
+    </div>
+
+    <div class="stats">
+      <div>
+        <small>NEAREST FIELDER</small>
+        <strong id="nearest">—</strong>
+      </div>
+
+      <div>
+        <small>DISTANCE</small>
+        <strong id="distance">—</strong>
+      </div>
+
+      <div>
+        <small>HANG TIME</small>
+        <strong id="time">—</strong>
+      </div>
+
+      <div>
+        <small>LEVEL</small>
+        <strong id="resultLevel">—</strong>
+      </div>
+    </div>
+
+    <p id="explanation"></p>
+  </section>
+
+  <section class="argument-mode">
+    <h2>🗣️ ARGUMENT MODE</h2>
+    <p>Choose your verdict before running the simulation.</p>
+
+    <div class="vote-buttons">
+      <button class="vote" data-vote="CAUGHT">🧤 CAUGHT</button>
+      <button class="vote" data-vote="NOT CAUGHT">🏏 NOT CAUGHT</button>
+    </div>
+
+    <p id="prediction">Choose your side!</p>
+  </section>
+
+</main>
+
+<footer>
+  NETSIM • FREE CRICKET TRAINING SIMULATOR
+</footer>
+
+<script>
+  // CAMERA AND RECORDING
+  let cameraStream = null;
+  let mediaRecorder = null;
+  let recordedChunks = [];
+
+  const camera = document.getElementById("camera");
+  const playback = document.getElementById("playback");
+  const startCameraButton = document.getElementById("startCamera");
+  const stopCameraButton = document.getElementById("stopCamera");
+  const recordButton = document.getElementById("recordButton");
+  const stopRecordButton = document.getElementById("stopRecordButton");
+  const cameraStatus = document.getElementById("cameraStatus");
+
+  startCameraButton.addEventListener("click", async function () {
+    try {
+      cameraStatus.textContent = "Requesting camera permission...";
+
+      cameraStream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: { ideal: "environment" } },
+        audio: true
+      });
+
+      camera.srcObject = cameraStream;
+
+      cameraStatus.textContent =
+        "Camera is live! Position it safely and press Start Recording.";
+
+      recordButton.disabled = false;
+
+    } catch (error) {
+      console.error(error);
+
+      cameraStatus.textContent =
+        "Camera access failed. Allow camera permission and open the site using HTTPS.";
+    }
+  });
+
+  recordButton.addEventListener("click", function () {
+    if (!cameraStream) return;
+
+    recordedChunks = [];
+
+    mediaRecorder = new MediaRecorder(cameraStream);
+
+    mediaRecorder.ondataavailable = function (event) {
+      if (event.data.size > 0) {
+        recordedChunks.push(event.data);
+      }
+    };
+
+    mediaRecorder.onstop = function () {
+      const videoBlob = new Blob(recordedChunks, {
+        type: "video/webm"
+      });
+
+      const videoURL = URL.createObjectURL(videoBlob);
+
+      playback.src = videoURL;
+      playback.style.display = "block";
+
+      cameraStatus.textContent =
+        "Recording saved! Watch the replay and then run your simulation.";
+    };
+
+    mediaRecorder.start();
+
+    cameraStatus.textContent = "🔴 RECORDING...";
+
+    recordButton.disabled = true;
+    stopRecordButton.disabled = false;
+  });
+
+  stopRecordButton.addEventListener("click", function () {
+    if (mediaRecorder && mediaRecorder.state !== "inactive") {
+      mediaRecorder.stop();
+    }
+
+    recordButton.disabled = false;
+    stopRecordButton.disabled = true;
+  });
+
+  stopCameraButton.addEventListener("click", function () {
+    if (cameraStream) {
+      cameraStream.getTracks().forEach(function (track) {
+        track.stop();
+      });
+
+      camera.srcObject = null;
+      cameraStream = null;
+    }
+
+    recordButton.disabled = true;
+    stopRecordButton.disabled = true;
+
+    cameraStatus.textContent = "Camera stopped.";
+  });
+
+
+  // CRICKET FIELD SIMULATOR
+  const field = document.getElementById("field");
+  const ball = document.getElementById("ball");
+  const simulateButton = document.getElementById("simulate");
+
+  let ballPosition = null;
+  let selectedVote = null;
+  let shotType = "lofted";
+
+  const defaultFielders = [
+    { name: "Keeper", x: 50, y: 66 },
+    { name: "Slip", x: 38, y: 62 },
+    { name: "Point", x: 24, y: 43 },
+    { name: "Cover", x: 31, y: 28 },
+    { name: "Mid-off", x: 43, y: 20 },
+    { name: "Mid-on", x: 57, y: 20 },
+    { name: "Midwicket", x: 69, y: 30 },
+    { name: "Fine Leg", x: 79, y: 60 },
+    { name: "Third Man", x: 18, y: 62 },
+    { name: "Long Off", x: 30, y: 12 },
+    { name: "Long On", x: 70, y: 12 }
+  ];
+
+  let fielders = JSON.parse(JSON.stringify(defaultFielders));
+
+  const levelSettings = {
+    U12: { speed: 3.5, reaction: 0.85, skill: 48 },
+    U14: { speed: 4.2, reaction: 0.70, skill: 58 },
+    U16: { speed: 5.0, reaction: 0.58, skill: 68 },
+    Adult: { speed: 5.6, reaction: 0.48, skill: 76 },
+    Pro: { speed: 6.8, reaction: 0.32, skill: 90 }
+  };
+
+  function createFielders() {
+    document.querySelectorAll(".fielder").forEach(function (element) {
+      element.remove();
+    });
+
+    fielders.forEach(function (fielder, index) {
+      const player = document.createElement("div");
+
+      player.className = "fielder";
+      player.textContent = index + 1;
+      player.style.left = fielder.x + "%";
+      player.style.top = fielder.y + "%";
+
+      const name = document.createElement("span");
+      name.className = "fielder-name";
+      name.textContent = fielder.name;
+
+      player.appendChild(name);
+      field.appendChild(player);
+
+      makeDraggable(player, fielder);
+    });
+  }
+
+  function makeDraggable(element, fielder) {
+    let dragging = false;
+
+    element.addEventListener("pointerdown", function (event) {
+      dragging = true;
+      element.setPointerCapture(event.pointerId);
+      event.stopPropagation();
+    });
+
+    element.addEventListener("pointermove", function (event) {
+      if (!dragging) return;
+
+      const rect = field.getBoundingClientRect();
+
+      let x = ((event.clientX - rect.left) / rect.width) * 100;
+      let y = ((event.clientY - rect.top) / rect.height) * 100;
+
+      x = Math.max(3, Math.min(97, x));
+      y = Math.max(3, Math.min(97, y));
+
+      fielder.x = x;
+      fielder.y = y;
+
+      element.style.left = x + "%";
+      element.style.top = y + "%";
+    });
+
+    element.addEventListener("pointerup", function () {
+      dragging = false;
+    });
+  }
+
+  field.addEventListener("click", function (event) {
+    if (
+      event.target.classList.contains("fielder") ||
+      event.target.classList.contains("fielder-name")
+    ) return;
+
+    const rect = field.getBoundingClientRect();
+
+    const x = ((event.clientX - rect.left) / rect.width) * 100;
+    const y = ((event.clientY - rect.top) / rect.height) * 100;
+
+    ballPosition = { x: x, y: y };
+
+    ball.style.left = x + "%";
+    ball.style.top = y + "%";
+    ball.classList.remove("hidden");
+
+    simulateButton.disabled = false;
+
+    document.getElementById("status").textContent =
+      "Ball mapped! Press Run Simulation.";
+  });
+
+  document.getElementById("hangTime").addEventListener("input", function () {
+    document.getElementById("hangValue").textContent =
+      Number(this.value).toFixed(1);
+  });
+
+  document.querySelectorAll(".shot-button").forEach(function (button) {
+    button.addEventListener("click", function () {
+      document.querySelectorAll(".shot-button").forEach(function (item) {
+        item.classList.remove("active");
+      });
+
+      button.classList.add("active");
+      shotType = button.dataset.shot;
+    });
+  });
+
+  simulateButton.addEventListener("click", runSimulation);
+
+  function runSimulation() {
+    if (!ballPosition) return;
+
+    const level = document.getElementById("level").value;
+    const settings = levelSettings[level];
+    const hangTime = Number(document.getElementById("hangTime").value);
+
+    let nearestFielder = null;
+    let nearestDistance = Infinity;
+
+    fielders.forEach(function (fielder) {
+      const xDistance = (fielder.x - ballPosition.x) * 0.72;
+      const yDistance = fielder.y - ballPosition.y;
+
+      const distance = Math.sqrt(
+        xDistance * xDistance +
+        yDistance * yDistance
+      );
+
+      if (distance < nearestDistance) {
+        nearestDistance = distance;
+        nearestFielder = fielder;
+      }
+    });
+
+    const distanceMetres = nearestDistance * 0.82;
+
+    const availableTime = Math.max(
+      0,
+      hangTime - settings.reaction
+    );
+
+    const reachableDistance =
+      settings.speed * availableTime;
+
+    let chance =
+      settings.skill * 0.32 +
+      Math.min(
+        1,
+        reachableDistance / (distanceMetres + 0.1)
+      ) * 68;
+
+    if (shotType === "ground") {
+      chance *= 0.58;
+    }
+
+    chance = Math.round(Math.max(2, Math.min(98, chance)));
+
+    const caught = chance >= 50;
+
+    document.getElementById("verdict").textContent =
+      caught ? "LIKELY CAUGHT!" : "LIKELY NOT CAUGHT!";
+
+    document.getElementById("chance").textContent = chance;
+    document.getElementById("nearest").textContent =
+      nearestFielder.name;
+
+    document.getElementById("distance").textContent =
+      distanceMetres.toFixed(1) + " m";
+
+    document.getElementById("time").textContent =
+      hangTime.toFixed(1) + " seconds";
+
+    document.getElementById("resultLevel").textContent = level;
+
+    let explanation =
+      nearestFielder.name +
+      " has approximately " +
+      reachableDistance.toFixed(1) +
+      " metres of movement available.";
+
+    if (selectedVote) {
+      explanation +=
+        " Your prediction was: " +
+        selectedVote + ".";
+    }
+
+    explanation +=
+      " This is a training simulation estimate.";
+
+    document.getElementById("explanation").textContent =
+      explanation;
+
+    document.getElementById("result").classList.remove("hidden");
+
+    document.getElementById("result").scrollIntoView({
+      behavior: "smooth",
+      block: "nearest"
+    });
+  }
+
+  document.getElementById("reset").addEventListener("click", function () {
+    fielders = JSON.parse(JSON.stringify(defaultFielders));
+
+    createFielders();
+
+    ballPosition = null;
+    ball.classList.add("hidden");
+    simulateButton.disabled = true;
+
+    document.getElementById("result").classList.add("hidden");
+
+    document.getElementById("status").textContent =
+      "Drag fielders, then click where the ball lands.";
+  });
+
+  document.querySelectorAll(".vote").forEach(function (button) {
+    button.addEventListener("click", function () {
+      selectedVote = button.dataset.vote;
+
+      document.querySelectorAll(".vote").forEach(function (item) {
+        item.classList.remove("selected");
+      });
+
+      button.classList.add("selected");
+
+      document.getElementById("prediction").textContent =
+        "Your prediction: " +
+        selectedVote +
+        ". Now run the simulator!";
+    });
+  });
+
+  createFielders();
+</script>
+
+</body>
+</html>
